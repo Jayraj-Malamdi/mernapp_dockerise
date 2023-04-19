@@ -1,0 +1,45 @@
+# application building stage
+FROM node:14-alpine AS build
+
+WORKDIR /trainee_frontend_build
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+
+# # application running stage
+# FROM node:14-alpine AS run
+
+# WORKDIR /trainee_frontend
+
+# # here COPY --from=source is used to copy files or directories from prev. build stage to current stage.
+# COPY --from=build /trainee_frontend_build/build .
+
+# COPY package.json ./
+
+# # here RUN ... --only=production means to install only the production dependencies from package.json for mern app.
+# RUN npm install --only=production
+
+# CMD ["npm", "start"]
+
+
+# nginx stage
+#WAY 1: using nginx image
+FROM nginx:1.23-alpine
+
+WORKDIR /usr/share/nginx/html
+
+# removing all files(index.html) fron start
+RUN rm -rf ./*
+
+COPY --from=build /trainee_frontend_build/build .
+
+CMD ["nginx", "-g", "daemon off;"]
+
+
+# WAY 2: using ubuntu, and then installing nginx

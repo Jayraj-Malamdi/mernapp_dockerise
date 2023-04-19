@@ -1,0 +1,183 @@
+# # for load 
+
+# version : "3"
+
+# services:
+# # database service: named as mongodb
+#   mongodb1:
+#     image: mongo
+#     # container_name: mongodb_dev
+#     restart: always
+#     # ports:
+#     #   - 27017:27017
+#     # env_file:
+#     #   - ./trainee_backend/.env
+#     #environment:
+#      # - DB_USERNAME=$DB_USERNAME
+#       #- DB_PASSWORD=$DB_PASSWORD      
+#     networks:
+#      # - mernapp
+#       - host
+#     volumes:
+#       - ./trainee_backend/database/storage/:/data/db    # bind mount
+#     #  - storage:/data/db                                # volume mount
+#   # mongodb2:
+#   #   image: mongo
+#   #   # container_name: mongodb_dev
+#   #   restart: always
+#   #   # ports:
+#   #   #   - 27017:27017
+#   #   # env_file:
+#   #   #   - ./trainee_backend/.env
+#   #   #environment:
+#   #    # - DB_USERNAME=$DB_USERNAME
+#   #     #- DB_PASSWORD=$DB_PASSWORD      
+#   #   networks:
+#   #     - mernapp
+#   #   volumes:
+#   #     - ./trainee_backend/database/storage/:/data/db    # bind mount
+#   #   #  - storage:/data/db                                # volume mount
+
+# # backend service: named as trainee_backend
+#   trainee_backend1:
+#     build:
+#       dockerfile: Dockerfile
+#       context: ./trainee_backend/
+#     # container_name: trainee_backend_dev
+#     restart: always
+#     ports:
+#       - 8000:8000
+#     env_file:
+#       - ./trainee_backend/.env
+#     networks:
+#       #- mernapp
+#       - host
+#     depends_on:
+#       - mongodb1
+#   trainee_backend2:
+#     build:
+#       dockerfile: Dockerfile
+#       context: ./trainee_backend/
+#     # container_name: trainee_backend_dev
+#     restart: always
+#     ports:
+#       - 8001:8001
+#     env_file:
+#       - ./trainee_backend/.env
+#     networks:
+#      # - mernapp
+#       - host
+#     depends_on:
+#       - mongodb1
+
+# # # frontend service: named as trainee_frontend
+# #   trainee_frontend:
+# #     build:
+# #       dockerfile: Dockerfile.dev
+# #       context: ./trainee_frontend/
+# #     container_name: trainee_frontend_load
+# #     restart: always
+# #     ports:
+# #       - 3000:80
+# #     networks:
+# #       - mernapp
+# #     depends_on:
+# #       - trainee_backend
+
+# # # nginx as a load balancer
+# #   nginx:
+# #     image: nginx
+# #     volumes:
+# #       - ./nginx/default.conf:/etc/ngnix/sites-enabled/default.conf
+# #     depends_on:
+# #       - trainee_frontend
+
+
+#   trainee_frontend:
+#       build:
+#         dockerfile: Dockerfile.dev
+#         context: ./trainee_frontend/
+#       container_name: trainee_frontend_load
+#       restart: always
+#       ports:
+#         - 3000:80
+#       networks:
+#        # - mernapp
+#         - host
+#       # depends_on:
+#       #   - trainee_backend
+#   nginx:
+#       image: nginx
+#       volumes:
+#         - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+#       depends_on:
+#         - trainee_backend1
+#         - trainee_backend2
+# # networks used for connecting different containers
+# networks:
+#   host:
+#   mernapp:
+#     driver: bridge
+
+# volumes:                   # volume mount declared
+#   storage:          
+
+# task:
+
+version : "3"
+
+services:
+# database service: named as mongodb
+  mongodb:
+    image: mongo
+    container_name: mongodb_load
+    restart: always  
+    # env_file:
+    #   - .env
+    # environment:
+    #   - URL_DB: `mongodb://mongodb:27017/mern`
+    networks:
+      - mern_2
+    volumes:
+      # - ./trainee_backend/database/storage/:/data/db    # bind mount
+      - storage:/data/db                                # volume mount
+
+# backend service: named as trainee_backend
+  trainee_backend:
+    build:
+      dockerfile: Dockerfile
+      context: ./trainee_backend/
+    container_name: trainee_backend
+    restart: always
+    # ports:
+    #   - 8000:8000
+    networks:
+      - mern_2
+      - mern_1
+    depends_on:
+      - mongodb
+    
+  
+
+# frontend service: named as trainee_frontend
+  trainee_frontend:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./trainee_frontend/
+    container_name: trainee_frontend_load
+    restart: always
+    ports:
+      - 3000:80
+    networks:
+      - mern_1
+    depends_on:
+      - trainee_backend
+
+# networks used for connecting different containers
+networks:
+  mern_1:
+    driver: bridge
+  mern_2:
+volumes:                   # volume mount declared
+  storage:          
+

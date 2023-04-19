@@ -1,0 +1,61 @@
+# for production
+
+version : "3"
+
+services:
+# database service: named as mongodb
+  mongodb:
+    image: mongo
+    container_name: mongodb_prod
+    restart: always
+    ports:
+      - 27017:27017
+    env_file:
+      - ./trainee_backend/.env
+    #environment:
+     # - DB_USERNAME=$DB_USERNAME
+      #- DB_PASSWORD=$DB_PASSWORD      
+    networks:
+      - mernapp
+    volumes:
+      - ./trainee_backend/database/storage/:/data/db    # bind mount
+    #  - storage:/data/db                                # volume mount
+
+# backend service: named as trainee_backend
+  trainee_backend:
+    build:
+      dockerfile: Dockerfile
+      context: ./trainee_backend/
+    container_name: trainee_backend_prod
+    restart: always
+    ports:
+      - 8000:8000
+    env_file:
+      - ./trainee_backend/.env
+    networks:
+      - mernapp
+    depends_on:
+      - mongodb
+
+# frontend service: named as trainee_frontend
+  trainee_frontend:
+    build:
+      dockerfile: Dockerfile.prod
+      context: ./trainee_frontend/
+    container_name: trainee_frontend_prod
+    #restart: always
+    ports:
+      - 3000:80
+    networks:
+      - mernapp
+    depends_on:
+      - trainee_backend
+
+# networks used for connecting different containers
+networks:
+  mernapp:
+    driver: bridge
+
+volumes:                   # volume mount declared
+  storage:          
+         
