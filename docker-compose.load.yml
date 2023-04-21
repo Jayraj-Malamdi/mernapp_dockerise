@@ -124,7 +124,7 @@
 
 # task:
 
-version : "3"
+version : "2.4"
 
 services:
 # database service: named as mongodb
@@ -154,6 +154,7 @@ services:
     networks:
       - mern_2
       - mern_1
+    mem_limit: 300m
     depends_on:
       - mongodb
     
@@ -167,7 +168,7 @@ services:
     container_name: trainee_frontend_load
     restart: always
     ports:
-      - 3000:80
+      - 80:80
     networks:
       - mern_1
     depends_on:
